@@ -33,7 +33,10 @@ void setup() {
   Serial.println("");
   Serial.print("Connected to WiFi network with IP Address: ");
   Serial.println(WiFi.localIP());
- 
+  digitalWrite(15, LOW);
+  digitalWrite(16, LOW);
+  digitalWrite(17, LOW);
+  digitalWrite(18, LOW);
   Serial.println("Timer set to 5 seconds (timerDelay variable), it will take 5 seconds before publishing the first reading.");
 }
 
@@ -72,24 +75,12 @@ void loop() {
         }
       }
     
-    
-      // myObject.keys() can be used to get an array of all the keys in the object
-
-  
-//      pumpId = myObject[keys[0]];
-//      pumpStatus = myObject[keys[1]];
-
       Serial.print("id: ");
       Serial.println(pumpId);
       Serial.print("status: ");
       Serial.println(pumpStatus);
       
-//      if(pumpStatus){
-//        digitalWrite(15, LOW);
-//      } else{
-//        digitalWrite(15, HIGH);
-//      }
-      
+
 
     }
     else {
