@@ -6,22 +6,24 @@ const char* ssid = "Rede da Familia Batista";
 const char* password = "CassioLuisBatista001";
 
 
-const char* serverName = "http://192.168.100.34:8000/pumps/1/";
+const char* serverName = "http://192.168.100.34:8000/pumps/";
 
-// the following variables are unsigned longs because the time, measured in
-// milliseconds, will quickly become a bigger number than can be stored in an int.
 unsigned long lastTime = 0;
-// Timer set to 10 minutes (600000)
-//unsigned long timerDelay = 600000;
-// Set timer to 5 seconds (5000)
-unsigned long timerDelay = 5500;
+
+unsigned long timerDelay = 2000;
+
 String sensorReadings;
 int pumpId;
 bool pumpStatus;
 
 void setup() {
   Serial.begin(115200);
-
+  
+  pinMode(15, OUTPUT);
+  pinMode(16, OUTPUT);
+  pinMode(17, OUTPUT);
+  pinMode(18, OUTPUT);
+  
   WiFi.begin(ssid, password);
   Serial.println("Connecting");
   while(WiFi.status() != WL_CONNECTED) {
@@ -42,43 +44,52 @@ void loop() {
     if(WiFi.status()== WL_CONNECTED){
               
       sensorReadings = httpGETRequest(serverName);
-      //Serial.println(sensorReadings);
+     
       JSONVar myObject = JSON.parse(sensorReadings);
   
       // JSON.typeof(jsonVar) can be used to get the type of the var
-
-      
       
       if (JSON.typeof(myObject) == "undefined") {
         Serial.println("Parsing input failed!");
         return;
       }
+      
+      JSONVar keys;
+      
+      for(int i = 0 ; i < 4; i++ ){
+        keys = myObject[i].keys();
+        pumpId = myObject[i][keys[0]];
+        pumpStatus = myObject[i][keys[1]];
+        Serial.println(i+1);
+        Serial.print("id: ");
+        Serial.println(pumpId);
+        Serial.print("status: ");
+        Serial.println(pumpStatus);
+        if(pumpStatus){
+          digitalWrite(14 + pumpId, LOW);
+        } else{
+          digitalWrite(14 + pumpId, HIGH);
+        }
+      }
     
     
       // myObject.keys() can be used to get an array of all the keys in the object
-      JSONVar keys = myObject.keys();
 
-      pumpId = myObject[keys[0]];
-      pumpStatus = myObject[keys[1]];
+  
+//      pumpId = myObject[keys[0]];
+//      pumpStatus = myObject[keys[1]];
 
       Serial.print("id: ");
       Serial.println(pumpId);
       Serial.print("status: ");
       Serial.println(pumpStatus);
       
-    
-//      for (int i = 0; i < keys.length(); i++) {
-//        JSONVar value = myObject[keys[i]];
-//        Serial.print(keys[i]);
-//        Serial.print(" = ");
-//        Serial.println(value);
-//        sensorReadingsArr[i] = double(value);
+//      if(pumpStatus){
+//        digitalWrite(15, LOW);
+//      } else{
+//        digitalWrite(15, HIGH);
 //      }
-//      Serial.print("1 = ");
-//      Serial.println(sensorReadingsArr[0]);
-//      Serial.print("2 = ");
-//      Serial.println(sensorReadingsArr[1]);
-//    ;
+      
 
     }
     else {
@@ -103,7 +114,7 @@ String httpGETRequest(const char* serverName) {
     Serial.print("HTTP Response code: ");
     Serial.println(httpResponseCode);
     payload = http.getString();
-  
+    
   }
   else {
     Serial.print("Error code: ");
