@@ -1,16 +1,16 @@
 import 'dart:convert';
 
-import 'package:Irrigation/device.dart';
+import 'package:Irrigation/models/device.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 class DevicesManager extends ChangeNotifier {
-  static const String url = 'http://192.168.100.34:8000/';
+  static const String url = 'https://irrigation-uberlandia.herokuapp.com/';
 
   List<Device> devices = [];
 
   DevicesManager() {
-    getDevices();
+   
   }
 
   Future<void> getDevices() async {
@@ -23,9 +23,10 @@ class DevicesManager extends ChangeNotifier {
       for (var item in jsonBody) {
         list.add(Device.fromJson(item));
       }
-      print(list);
+      
       devices = list;
-      notifyListeners();
+      devices.sort((a, b) => a.id.compareTo(b.id));
+      
     }
     
   }
