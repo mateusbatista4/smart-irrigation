@@ -2,9 +2,8 @@ import 'package:Irrigation/models/device.dart';
 import 'package:flutter/material.dart';
 
 class DeviceCard extends StatefulWidget {
-  const DeviceCard({Key key, this.device, this.onPress}) : super(key: key);
+  const DeviceCard({Key key, this.device}) : super(key: key);
   final Device device;
-  final Function onPress;
 
   @override
   _DeviceCardState createState() => _DeviceCardState();
@@ -30,38 +29,41 @@ class _DeviceCardState extends State<DeviceCard> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: widget.onPress,
-      child: Card(
-        margin: EdgeInsets.all(7),
-        child: Container(
-          padding: EdgeInsets.all(5),
-          width: double.infinity,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  Icon(Icons.power),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: Text(widget.device.label),
-                  ),
-                ],
-              ),
-              Switch(
-                onChanged: (value) {
-                  setState(() {
+    return Card(
+      margin: EdgeInsets.all(7),
+      child: Container(
+        padding: EdgeInsets.all(5),
+        width: double.infinity,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: Icon(Icons.power),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: Text(widget.device.label),
+                ),
+              ],
+            ),
+            Switch(
+              onChanged: (value) {
+                setState(
+                  () {
                     isSwitchedFT = value;
                     saveSwitchState(value);
                     print('Saved state is $isSwitchedFT');
                     //switch works
-                  });
-                },
-                value: isSwitchedFT,
-              )
-            ],
-          ),
+                  },
+                );
+              },
+              value: isSwitchedFT,
+            )
+          ],
         ),
       ),
     );
