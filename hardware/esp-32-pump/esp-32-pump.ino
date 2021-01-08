@@ -3,47 +3,73 @@
 #include <Arduino_JSON.h>
 #include <WiFi.h>
 
-const char* ssid = "Rede da Familia Batista";
-const char* password = "CassioLuisBatista001";
+const char* ssid = "Eclipse 2020";
+const char* password = "99916622";
 const char* serverName = "https://irrigation-uberlandia.herokuapp.com/pumps/";
 unsigned long lastTime = 0;
 unsigned long timerDelay = 1000;
+
 int lcdColumns = 16;
 int lcdRows = 2;
-
-
-LiquidCrystal_I2C lcd(0x27, lcdColumns, lcdRows);  
+LiquidCrystal_I2C lcd(0x3F, lcdColumns, lcdRows);  
 
 String sensorReadings;
 int pumpId;
 bool pumpStatus;
+String pumpName;
+int dotCounter = 0;
+int lastStatus[4] = {0,0,0,0};
+
+
 
 void setup() {
   Serial.begin(115200);
-  
+  pinMode(13, OUTPUT);
   pinMode(15, OUTPUT);
   pinMode(16, OUTPUT);
   pinMode(17, OUTPUT);
   pinMode(18, OUTPUT);
+
+  lcd.init();
+  lcd.backlight();
+  
+  lcd.print("Bem Vindx!");
+  delay(5000);
+  
+  lcd.clear();
   
   WiFi.begin(ssid, password);
-  Serial.println("Connecting");
+  lcd.print("Conectando a ");
+  lcd.setCursor(0,1);
+  lcd.print(ssid);
+  //Serial.println("Connecting");
+  
   while(WiFi.status() != WL_CONNECTED) {
     delay(500);
-    Serial.print(".");
+    lcd.print(".");
+    dotCounter++;
+    
+    if(dotCounter >= 4){
+      lcd.clear();
+      lcd.print("Conectando a ");
+      lcd.setCursor(0,1);
+      lcd.print(ssid);
+      dotCounter = 0;
+    }
   }
-  Serial.println("");
-  Serial.print("Connected to WiFi network with IP Address: ");
-  Serial.println(WiFi.localIP());
+  lcd.clear();
+ 
+  lcd.print("Conectado com ");
+  lcd.setCursor(0,1);
+  lcd.print(ssid);
   
+  digitalWrite(13, HIGH);
   digitalWrite(15, HIGH);
   digitalWrite(16, HIGH);
   digitalWrite(17, HIGH);
   digitalWrite(18, HIGH);
   
-  lcd.init();                      
-  lcd.backlight();
-  Serial.println("Timer set to 5 seconds (timerDelay variable), it will take 5 seconds before publishing the first reading.");
+  
 }
 
 void loop() {
@@ -69,28 +95,31 @@ void loop() {
         keys = myObject[i].keys();
         pumpId = myObject[i][keys[0]];
         pumpStatus = myObject[i][keys[1]];
+        pumpName = myObject[i][keys[2]];
         Serial.println(i+1);
         Serial.print("id: ");
         Serial.println(pumpId);
         Serial.print("status: ");
         Serial.println(pumpStatus);
+        
         if(pumpStatus){
-          digitalWrite(14 + pumpId, LOW);
+           digitalWrite(14 + pumpId, LOW);
         } else{
           digitalWrite(14 + pumpId, HIGH);
         }
+        lastStatus[i] = pumpStatus;
+        
       }
-    
+      
       Serial.print("id: ");
       Serial.println(pumpId);
       Serial.print("status: ");
       Serial.println(pumpStatus);
-      
-
 
     }
     else {
-      Serial.println("WiFi Disconnected");
+      lcd.clear();
+      lcd.print("WiFi Desconectado...");
     }
     lastTime = millis();
   }
@@ -110,10 +139,12 @@ String httpGETRequest(const char* serverName) {
   if (httpResponseCode>0) {
     Serial.print("HTTP Response code: ");
     Serial.println(httpResponseCode);
+    digitalWrite(13, HIGH);
     payload = http.getString();
     
   }
   else {
+    digitalWrite(13, LOW);
     Serial.print("Error code: ");
     Serial.println(httpResponseCode);
   }
@@ -122,8 +153,5 @@ String httpGETRequest(const char* serverName) {
 
   return payload;
 }
-void print(){
-  
 
-}
 
